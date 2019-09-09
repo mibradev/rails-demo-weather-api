@@ -1,0 +1,81 @@
+<div id="locations">
+  <login v-if="token == null"></login>
+  <temperature v-else></temperature>
+</div>
+
+<script type="text/x-template" id="temperatureTemplate">
+  <div>
+    <h1>{{ temperature }}F</h1>
+    <p>{{ location }}</p>
+  </div>
+</script>
+
+<script type="text/x-template" id="loginTemplate">
+  <form>
+    <input v-model="email" type="email" placeholder="Email">
+    <input v-model="password" type="password" placeholder="Password">
+    <button v-on:click="submit">Login</button>
+  </form>
+</script>
+
+<script>
+  var state = {
+    token: localStorage.getItem('token')
+  }
+
+  Vue.component('temperature', {
+    template: '#temperatureTemplate',
+    data: function() {
+      return {
+        temperature: null,
+        location: null
+      }
+    },
+    created: function() {
+      this.fetchData()
+    },
+    methods: {
+      fetchData: function() {
+        var self = this
+
+        $.ajax({
+          url: '/api/v1/locations/1',
+          headers: {'Authorization': 'Bearer ' + state.token},
+          success: function(response) {
+            self.temperature = response.data.attributes.current.temperature
+            self.location = response.data.attributes.name
+          }
+        })
+      }
+    }
+  })
+
+  Vue.component('login', {
+    template: '#loginTemplate',
+    data: function() {
+      return {
+        email: 'user@example.com',
+        password: '123456'
+      }
+    },
+    methods: {
+      submit: function(event) {
+        event.preventDefault()
+
+        $.post(
+          '/api/v1/auth',
+          {user: {email: this.email, password: this.password}},
+          function(data) {
+            localStorage.setItem('token', data.token)
+            state.token = data.token
+          }
+        )
+      }
+    }
+  })
+
+  new Vue({
+    el: '#locations',
+    data: state
+  })
+</script>
