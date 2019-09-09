@@ -30,6 +30,7 @@ gem 'bootsnap', '>= 1.4.2', require: false
 
 gem 'devise', '~> 4.7.1'
 gem 'jwt', '~> 2.2.1'
+gem 'active_model_serializers', '~> 0.10.10'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
